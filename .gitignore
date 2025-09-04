@@ -4,3 +4,9 @@ MNIST_DATASET/
 MNIST/
 archive/
 dogs-vs-cats/
+
+*.jpeg
+*.png
+*.zip
+*.mp4
+*.psd
