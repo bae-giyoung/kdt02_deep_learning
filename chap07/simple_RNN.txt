@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+
+# 한글 폰트 설정
+plt.rcParams['font.family'] = ['Malgun Gothic']
+plt.rcParams['axes.unicode_minus'] = False
+
+# GPU 사용 가능 여부 확인
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"사용 디바이스: {device}")
+
+# %%
+def normalize_data(data):
+    data_tensor = torch.FloatTensor(data) if not isinstance(data, torch.Tensor) else data
+    data_min = torch.min(data_tensor)
+    data_max = torch.max(data_tensor)
+    normalized_data = (data_tensor - data_min) / (data_max - data_min)
+    return normalized_data.numpy(), data_min.item(), data_max.item()
+
+def denormalize_data(normalized_data, data_min, data_max):
+    normalized_tensor = torch.FloatTensor(normalized_data) if not isinstance(normalized_data, torch.Tensor) else normalized_data
+    denormalized = normalized_tensor * (data_max - data_min) + data_min
+    return denormalized.numpy()
+
+def calculate_mape(y_true, y_pred):
+    y_true_tensor = torch.FloatTensor(y_true) if not isinstance(y_true, torch.Tensor) else y_true
+    y_pred_tensor = torch.FloatTensor(y_pred) if not isinstance(y_pred, torch.Tensor) else y_pred
+    mask = y_true_tensor != 0
+    if mask.sum() == 0:
+        return 0.0
+    mape = torch.mean(torch.abs((y_true_tensor[mask] - y_pred_tensor[mask]) / y_true_tensor[mask])) * 100
+    return mape.item()
+
+def calculate_rmse(y_true, y_pred):
+    y_true_tensor = torch.FloatTensor(y_true) if not isinstance(y_true, torch.Tensor) else y_true
+    y_pred_tensor = torch.FloatTensor(y_pred) if not isinstance(y_pred, torch.Tensor) else y_pred
+    mse = torch.mean((y_true_tensor - y_pred_tensor) ** 2)
+    rmse = torch.sqrt(mse)
+    return rmse.item()
+
+def calculate_mae(y_true, y_pred):
+    y_true_tensor = torch.FloatTensor(y_true) if not isinstance(y_true, torch.Tensor) else y_true
+    y_pred_tensor = torch.FloatTensor(y_pred) if not isinstance(y_pred, torch.Tensor) else y_pred
+    mae = torch.mean(torch.abs(y_true_tensor - y_pred_tensor))
+    return mae.item()
